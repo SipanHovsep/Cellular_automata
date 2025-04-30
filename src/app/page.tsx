@@ -88,7 +88,7 @@ export default function Home() {
       </Tabs>
 
       <footer className="text-center text-muted-foreground text-sm mt-12">
-        Built by Manus AI Agent.
+        Created by NYUAD students
       </footer>
     </main>
   );

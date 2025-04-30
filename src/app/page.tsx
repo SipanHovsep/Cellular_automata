@@ -4,6 +4,7 @@ import ElementaryAutomataSimulator from '@/components/ElementaryAutomataSimulato
 import CustomRuleSimulator from '@/components/CustomRuleSimulator';
 import ForestFireSimulator from '@/components/ForestFireSimulator';
 import CrystalGrowthSimulator from '@/components/CrystalGrowthSimulator';
+import NyuadAutomataGrid from '@/components/NyuadAutomataGrid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,6 +18,8 @@ export default function Home() {
           Explore famous rules, create your own, and simulate natural phenomena.
         </p>
       </header>
+
+      <NyuadAutomataGrid />
 
       <Tabs defaultValue="famous-2d" className="w-full">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-6">

@@ -12,6 +12,7 @@ export default function Home() {
     <main className="container mx-auto p-4 md:p-8 space-y-8">
       <header className="text-center space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Cellular Automata Visualizer</h1>
+        <img src="/images/nyuad-logo.png" alt="NYU Abu Dhabi Logo" className="mx-auto my-2 h-12" />
         <p className="text-muted-foreground text-lg">
           Explore famous rules, create your own, and simulate natural phenomena.
         </p>

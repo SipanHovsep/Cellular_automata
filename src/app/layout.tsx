@@ -24,7 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+        <img src="/images/nyuad-logo.png" alt="NYU Abu Dhabi Logo" className="mx-auto my-2 h-12" />
+      </body>
     </html>
   )
 }

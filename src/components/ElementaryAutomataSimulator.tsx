@@ -61,7 +61,7 @@ const ruleDescriptions: { [key: string]: string } = {
 };
 
 const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = ({
-  initialWidth = 101, // Odd number often looks better for single cell start
+  initialWidth = 101,
   initialGenerations = 50,
   initialRuleNumber = 30,
 }) => {
@@ -72,40 +72,61 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
   const [ruleFunction, setRuleFunction] = useState<ElementaryRuleFunction>(() => getElementaryRule(initialRuleNumber));
   const [customRuleInput, setCustomRuleInput] = useState<string>(initialRuleNumber.toString());
   const [error, setError] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationSpeed, setAnimationSpeed] = useState(100); // milliseconds between generations
+  const [currentGeneration, setCurrentGeneration] = useState(0);
+
+  // Create initial empty grid
+  useEffect(() => {
+    const emptyGrid = createOneDGrid(width, () => false);
+    setHistory([emptyGrid]);
+  }, [width]);
 
   const generateHistory = useCallback(() => {
     try {
       const ruleFunc = getElementaryRule(ruleNumber);
       setRuleFunction(() => ruleFunc);
       const initialGrid = createOneDGrid(width, singleCellInitializer(width));
-      const generatedHistory: OneDGrid[] = [initialGrid];
-
-      let currentGrid = initialGrid;
-      for (let i = 1; i < numGenerations; i++) {
-        currentGrid = nextOneDGeneration(currentGrid, ruleFunc);
-        generatedHistory.push(currentGrid);
-      }
-      setHistory(generatedHistory);
+      setHistory([initialGrid]);
+      setCurrentGeneration(0);
+      setIsAnimating(true);
       setError(null);
     } catch (e: any) {
       setError(e.message || "Invalid rule number.");
       setHistory([]);
     }
-  }, [width, numGenerations, ruleNumber]);
+  }, [width, ruleNumber]);
+
+  // Animation effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isAnimating && currentGeneration < numGenerations) {
+      timer = setTimeout(() => {
+        const currentGrid = history[history.length - 1];
+        const nextGrid = nextOneDGeneration(currentGrid, ruleFunction);
+        setHistory(prev => [...prev, nextGrid]);
+        setCurrentGeneration(prev => prev + 1);
+      }, animationSpeed);
+    } else if (currentGeneration >= numGenerations) {
+      setIsAnimating(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isAnimating, currentGeneration, numGenerations, history, ruleFunction]);
 
   const handleReset = useCallback(() => {
-    setHistory([]);
+    setIsAnimating(false);
+    setCurrentGeneration(0);
+    const emptyGrid = createOneDGrid(width, () => false);
+    setHistory([emptyGrid]);
     setError(null);
-    const initialGrid = createOneDGrid(width, singleCellInitializer(width));
-    const ruleFunc = getElementaryRule(ruleNumber);
-    const generatedHistory: OneDGrid[] = [initialGrid];
-    let currentGrid = initialGrid;
-    for (let i = 1; i < numGenerations; i++) {
-      currentGrid = nextOneDGeneration(currentGrid, ruleFunc);
-      generatedHistory.push(currentGrid);
+  }, [width]);
+
+  const handleAnimationSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const speed = parseInt(e.target.value, 10);
+    if (!isNaN(speed) && speed > 0) {
+      setAnimationSpeed(speed);
     }
-    setHistory(generatedHistory);
-  }, [width, numGenerations, ruleNumber]);
+  };
 
   const handleRuleChange = (value: string) => {
     const num = parseInt(value, 10);
@@ -212,17 +233,30 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
             className="w-[80px]"
           />
         </div>
-         <Button onClick={generateHistory} variant="outline">Generate</Button>
-         <Button onClick={handleReset} variant="outline">Reset</Button>
-         {error && <p className="text-red-500 text-sm ml-4">{error}</p>}
+        <div className="flex items-center gap-2">
+          <Label htmlFor="speedInput">Animation Speed (ms):</Label>
+          <Input
+            id="speedInput"
+            type="number"
+            min="10"
+            max="1000"
+            value={animationSpeed}
+            onChange={handleAnimationSpeedChange}
+            className="w-[80px]"
+          />
+        </div>
+        <Button onClick={generateHistory} variant="outline">Generate</Button>
+        <Button onClick={handleReset} variant="outline">Reset</Button>
+        {error && <p className="text-red-500 text-sm ml-4">{error}</p>}
       </div>
 
       <div className="flex gap-8">
-        {history.length > 0 ? (
-          <GridDisplay grid={history} cellSize={8} />
-        ) : (
-          <div className="border border-gray-300 p-4 text-center text-gray-500">No history generated.</div>
-        )}
+        <div className="flex-1">
+          <GridDisplay 
+            grid={history} 
+            cellSize={Math.max(2, Math.min(8, 500 / width))} // Dynamic cell size based on width
+          />
+        </div>
         <div className="flex-1 p-4 border rounded-md bg-card">
           <h3 className="text-lg font-semibold mb-2 font-mono">{Object.keys(famousElementaryRules).find(key => famousElementaryRules[key] === ruleNumber) || `Rule ${ruleNumber}`}</h3>
           <div className="text-muted-foreground font-mono leading-relaxed" dangerouslySetInnerHTML={{ __html: ruleDescriptions[Object.keys(famousElementaryRules).find(key => famousElementaryRules[key] === ruleNumber) || ''] || '' }}></div>

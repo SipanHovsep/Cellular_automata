@@ -146,10 +146,17 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
   };
 
   const handleReset = useCallback(() => {
+    // Clear the history
     setHistory([]);
+    // Clear any errors
     setError(null);
+    // Create a new initial grid with a single live cell in the middle
+    const initialGrid = createOneDGrid(width, singleCellInitializer(width));
+    // Set the history to just the initial grid
+    setHistory([initialGrid]);
+    // Generate the rest of the history
     generateHistory();
-  }, [generateHistory]);
+  }, [width, generateHistory]);
 
   return (
     <div className="space-y-4">

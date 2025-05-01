@@ -97,7 +97,6 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     setHistory([]);
     setError(null);
     const initialGrid = createOneDGrid(width, singleCellInitializer(width));
-    setHistory([initialGrid]);
     const ruleFunc = getElementaryRule(ruleNumber);
     const generatedHistory: OneDGrid[] = [initialGrid];
     let currentGrid = initialGrid;
@@ -108,55 +107,55 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     setHistory(generatedHistory);
   }, [width, numGenerations, ruleNumber]);
 
-  useEffect(() => {
-    generateHistory();
-  }, [generateHistory]);
-
   const handleRuleChange = (value: string) => {
     const num = parseInt(value, 10);
     if (!isNaN(num) && num >= 0 && num <= 255) {
       setRuleNumber(num);
       setCustomRuleInput(value);
       setError(null);
+      generateHistory();
     } else {
-      // Handle selection of named rules if needed, or keep custom input
       if (famousElementaryRules[value] !== undefined) {
-          const famousRuleNum = famousElementaryRules[value];
-          setRuleNumber(famousRuleNum);
-          setCustomRuleInput(famousRuleNum.toString());
-          setError(null);
+        const famousRuleNum = famousElementaryRules[value];
+        setRuleNumber(famousRuleNum);
+        setCustomRuleInput(famousRuleNum.toString());
+        setError(null);
+        generateHistory();
       } else {
-          setCustomRuleInput(value); // Keep invalid input shown for correction
-          setError("Rule must be 0-255.");
+        setCustomRuleInput(value);
+        setError("Rule must be 0-255.");
       }
     }
   };
 
   const handleCustomRuleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setCustomRuleInput(value);
-      const num = parseInt(value, 10);
-      if (!isNaN(num) && num >= 0 && num <= 255) {
-          setRuleNumber(num);
-          setError(null);
-      } else if (value === "") {
-          setError("Please enter a rule number.");
-      } else {
-          setError("Rule must be 0-255.");
-      }
+    const value = e.target.value;
+    setCustomRuleInput(value);
+    const num = parseInt(value, 10);
+    if (!isNaN(num) && num >= 0 && num <= 255) {
+      setRuleNumber(num);
+      setError(null);
+      generateHistory();
+    } else if (value === "") {
+      setError("Please enter a rule number.");
+    } else {
+      setError("Rule must be 0-255.");
+    }
   };
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newWidth = parseInt(e.target.value, 10);
-    if (!isNaN(newWidth) && newWidth > 0 && newWidth < 500) { // Add upper limit
+    if (!isNaN(newWidth) && newWidth > 0 && newWidth < 500) {
       setWidth(newWidth);
+      generateHistory();
     }
   };
 
   const handleGenerationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newGenerations = parseInt(e.target.value, 10);
-    if (!isNaN(newGenerations) && newGenerations > 0 && newGenerations < 500) { // Add upper limit
+    if (!isNaN(newGenerations) && newGenerations > 0 && newGenerations < 500) {
       setNumGenerations(newGenerations);
+      generateHistory();
     }
   };
 

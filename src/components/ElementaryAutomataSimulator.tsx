@@ -254,7 +254,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
         <div className="flex-1">
           <GridDisplay 
             grid={history} 
-            cellSize={Math.max(2, Math.min(8, 500 / width))} // Dynamic cell size based on width
+            cellSize={Math.max(1, Math.min(8, Math.min(500 / width, 500 / numGenerations)))} // Scale based on both width and generations
           />
         </div>
         <div className="flex-1 p-4 border rounded-md bg-card">

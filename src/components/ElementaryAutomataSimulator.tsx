@@ -145,6 +145,12 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     }
   };
 
+  const handleReset = useCallback(() => {
+    setHistory([]);
+    setError(null);
+    generateHistory();
+  }, [generateHistory]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4 p-4 border rounded-md bg-card text-card-foreground">
@@ -199,6 +205,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
           />
         </div>
          <Button onClick={generateHistory} variant="outline">Generate</Button>
+         <Button onClick={handleReset} variant="outline">Reset</Button>
          {error && <p className="text-red-500 text-sm ml-4">{error}</p>}
       </div>
 

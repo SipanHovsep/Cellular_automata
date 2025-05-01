@@ -21,6 +21,45 @@ const famousElementaryRules: { [key: string]: number } = {
   'Rule 184 (Traffic)': 184,
 };
 
+const ruleDescriptions: { [key: string]: string } = {
+  'Rule 30': "<div class='space-y-2'>" +
+             "<div class='font-bold text-[#57068c]'>Class:</div> III (Chaotic)" +
+             "<div class='font-bold text-[#57068c]'>Features:</div>" +
+             "<div>• Produces chaotic, random-looking patterns from simple starting points.</div>" +
+             "<div>• Each cell's next state depends on itself and its two neighbors, following a specific rule (encoded as number 30).</div>" +
+             "<div>• Famous for generating complexity and unpredictability from simple rules.</div>" +
+             "<div>• Used in random number generation and as an example of how simple systems can create complex results.</div>" +
+             "<div>• Class III means its patterns are unpredictable and do not settle down or repeat.</div>" +
+             "</div>",
+  'Rule 90': "<div class='space-y-2'>" +
+             "<div class='font-bold text-[#57068c]'>Class:</div> II (Periodic/Fractal)" +
+             "<div class='font-bold text-[#57068c]'>Features:</div>" +
+             "<div>• Creates a repeating, triangular pattern known as the Sierpiński triangle.</div>" +
+             "<div>• Each cell's next state is determined by comparing its left and right neighbors (using the XOR operation).</div>" +
+             "<div>• The pattern is highly regular and self-similar, showing clear, repeating shapes.</div>" +
+             "<div>• Often used to demonstrate how fractals and mathematical patterns can emerge from simple rules.</div>" +
+             "<div>• Class II means its patterns are regular, repetitive, or form simple structures.</div>" +
+             "</div>",
+  'Rule 110': "<div class='space-y-2'>" +
+              "<div class='font-bold text-[#57068c]'>Class:</div> IV (Complex)" +
+              "<div class='font-bold text-[#57068c]'>Features:</div>" +
+              "<div>• Known for its complex and varied patterns, including moving structures that interact in interesting ways.</div>" +
+              "<div>• This rule is important because it is 'Turing complete,' meaning it can, in theory, perform any computation.</div>" +
+              "<div>• The patterns are neither totally random nor completely regular, but a mix of both.</div>" +
+              "<div>• Studied for its ability to model complex systems and computation with very simple rules.</div>" +
+              "<div>• Class IV means it produces complex structures that can interact and evolve in unpredictable ways.</div>" +
+              "</div>",
+  'Rule 184 (Traffic)': "<div class='space-y-2'>" +
+                        "<div class='font-bold text-[#57068c]'>Class:</div> II (Periodic/Stable)" +
+                        "<div class='font-bold text-[#57068c]'>Features:</div>" +
+                        "<div>• Models simple traffic flow: 'cars' (cells with value 1) move to the right if the space is empty.</div>" +
+                        "<div>• Over time, the system organizes itself into groups or jams, similar to real traffic.</div>" +
+                        "<div>• Helps researchers study how simple rules can explain real-world processes like traffic movement.</div>" +
+                        "<div>• Useful for understanding how local decisions create larger patterns (like traffic jams).</div>" +
+                        "<div>• Class II means its patterns tend to settle into repeating or stable arrangements.</div>" +
+                        "</div>",
+};
+
 const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = ({
   initialWidth = 101, // Odd number often looks better for single cell start
   initialGenerations = 50,
@@ -163,12 +202,17 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
          {error && <p className="text-red-500 text-sm ml-4">{error}</p>}
       </div>
 
-      {/* Render history using GridDisplay, treating history as a 2D grid */} 
-      {history.length > 0 ? (
+      <div className="flex gap-8">
+        {history.length > 0 ? (
           <GridDisplay grid={history} cellSize={8} />
-      ) : (
-          <div className="border border-gray-300 p-4 text-center text-gray-500">{error ? 'Error generating history.' : 'No history generated.'}</div>
-      )}
+        ) : (
+          <div className="border border-gray-300 p-4 text-center text-gray-500">No history generated.</div>
+        )}
+        <div className="flex-1 p-4 border rounded-md bg-card">
+          <h3 className="text-lg font-semibold mb-2 font-mono">{Object.keys(famousElementaryRules).find(key => famousElementaryRules[key] === ruleNumber) || `Rule ${ruleNumber}`}</h3>
+          <div className="text-muted-foreground font-mono leading-relaxed" dangerouslySetInnerHTML={{ __html: ruleDescriptions[Object.keys(famousElementaryRules).find(key => famousElementaryRules[key] === ruleNumber) || ''] || '' }}></div>
+        </div>
+      </div>
     </div>
   );
 };

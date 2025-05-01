@@ -15,14 +15,14 @@ interface AutomataSimulatorProps {
 }
 
 const famousRules: { [key: string]: RuleFunction } = {
-  'Conway': conwayRule,
+  "Conway's Game of Life": conwayRule,
   'Seeds': seedsRule,
   'HighLife': highLifeRule,
   // Add more 2D rules here if needed
 };
 
 const ruleDescriptions: { [key: string]: string } = {
-  'Conway': "Conway's Game of Life is defined on a 2D grid of cells (each either 'alive' or 'dead'), which evolve in discrete steps according to these simple rules based solely on each cell's eight neighbors:\n\n" +
+  "Conway's Game of Life": "Conway's Game of Life is defined on a 2D grid of cells (each either 'alive' or 'dead'), which evolve in discrete steps according to these simple rules based solely on each cell's eight neighbors:\n\n" +
             "<div class='space-y-2'>" +
             "<div>• <span class='font-bold text-[#57068c]'>Underpopulation:</span> Any live cell with fewer than 2 live neighbors dies.</div>" +
             "<div>• <span class='font-bold text-[#57068c]'>Survival:</span> Any live cell with 2 or 3 live neighbors survives to the next generation.</div>" +
@@ -37,7 +37,7 @@ const ruleDescriptions: { [key: string]: string } = {
 const AutomataSimulator: React.FC<AutomataSimulatorProps> = ({
   initialRows = 50,
   initialCols = 70,
-  initialRule = 'Conway',
+  initialRule = "Conway's Game of Life",
 }) => {
   const [rows, setRows] = useState(initialRows);
   const [cols, setCols] = useState(initialCols);

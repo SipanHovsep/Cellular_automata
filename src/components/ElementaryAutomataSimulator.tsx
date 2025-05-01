@@ -79,22 +79,6 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     setHistory([emptyGrid]);
   }, [numGenerations]);
 
-  // Animation effect
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isAnimating && currentGeneration < numGenerations) {
-      timer = setTimeout(() => {
-        const currentGrid = history[history.length - 1];
-        const nextGrid = nextOneDGeneration(currentGrid, ruleFunction);
-        setHistory(prev => [...prev, nextGrid]);
-        setCurrentGeneration(prev => prev + 1);
-      }, animationSpeed);
-    } else if (currentGeneration >= numGenerations) {
-      setIsAnimating(false);
-    }
-    return () => clearTimeout(timer);
-  }, [isAnimating, currentGeneration, numGenerations, history, ruleFunction]);
-
   const handleReset = useCallback(() => {
     setIsAnimating(false);
     setCurrentGeneration(0);
@@ -168,6 +152,22 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     }
   }, [numGenerations, ruleNumber]);
 
+  // Animation effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isAnimating && currentGeneration < numGenerations) {
+      timer = setTimeout(() => {
+        const currentGrid = history[history.length - 1];
+        const nextGrid = nextOneDGeneration(currentGrid, ruleFunction);
+        setHistory(prev => [...prev, nextGrid]);
+        setCurrentGeneration(prev => prev + 1);
+      }, animationSpeed);
+    } else if (currentGeneration >= numGenerations) {
+      setIsAnimating(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isAnimating, currentGeneration, numGenerations, history, ruleFunction]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4 p-4 border rounded-md bg-card text-card-foreground">
@@ -228,10 +228,12 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
 
       <div className="flex gap-8">
         <div className="flex-1">
-          <GridDisplay 
-            grid={history} 
-            cellSize={Math.max(1, Math.min(8, 500 / numGenerations))}
-          />
+          <div className="overflow-auto" style={{ maxHeight: '500px' }}>
+            <GridDisplay 
+              grid={history} 
+              cellSize={Math.max(1, Math.min(8, 500 / numGenerations))}
+            />
+          </div>
         </div>
         <div className="flex-1 p-4 border rounded-md bg-card">
           <h3 className="text-lg font-semibold mb-2 font-mono">{Object.keys(famousElementaryRules).find(key => famousElementaryRules[key] === ruleNumber) || `Rule ${ruleNumber}`}</h3>

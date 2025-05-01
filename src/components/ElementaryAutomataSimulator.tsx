@@ -76,7 +76,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
   const generateHistory = useCallback(() => {
     try {
       const ruleFunc = getElementaryRule(ruleNumber);
-      setRuleFunction(() => ruleFunc); // Store the valid rule function
+      setRuleFunction(() => ruleFunc);
       const initialGrid = createOneDGrid(width, singleCellInitializer(width));
       const generatedHistory: OneDGrid[] = [initialGrid];
 
@@ -86,16 +86,31 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
         generatedHistory.push(currentGrid);
       }
       setHistory(generatedHistory);
-      setError(null); // Clear previous errors
+      setError(null);
     } catch (e: any) {
       setError(e.message || "Invalid rule number.");
-      setHistory([]); // Clear history on error
+      setHistory([]);
     }
+  }, [width, numGenerations, ruleNumber]);
+
+  const handleReset = useCallback(() => {
+    setHistory([]);
+    setError(null);
+    const initialGrid = createOneDGrid(width, singleCellInitializer(width));
+    setHistory([initialGrid]);
+    const ruleFunc = getElementaryRule(ruleNumber);
+    const generatedHistory: OneDGrid[] = [initialGrid];
+    let currentGrid = initialGrid;
+    for (let i = 1; i < numGenerations; i++) {
+      currentGrid = nextOneDGeneration(currentGrid, ruleFunc);
+      generatedHistory.push(currentGrid);
+    }
+    setHistory(generatedHistory);
   }, [width, numGenerations, ruleNumber]);
 
   useEffect(() => {
     generateHistory();
-  }, [generateHistory]); // Regenerate when parameters change
+  }, [generateHistory]);
 
   const handleRuleChange = (value: string) => {
     const num = parseInt(value, 10);
@@ -144,19 +159,6 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
       setNumGenerations(newGenerations);
     }
   };
-
-  const handleReset = useCallback(() => {
-    // Clear the history
-    setHistory([]);
-    // Clear any errors
-    setError(null);
-    // Create a new initial grid with a single live cell in the middle
-    const initialGrid = createOneDGrid(width, singleCellInitializer(width));
-    // Set the history to just the initial grid
-    setHistory([initialGrid]);
-    // Generate the rest of the history
-    generateHistory();
-  }, [width, generateHistory]);
 
   return (
     <div className="space-y-4">

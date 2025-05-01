@@ -23,10 +23,12 @@ const famousRules: { [key: string]: RuleFunction } = {
 
 const ruleDescriptions: { [key: string]: string } = {
   'Conway': "Conway's Game of Life is defined on a 2D grid of cells (each either 'alive' or 'dead'), which evolve in discrete steps according to these simple rules based solely on each cell's eight neighbors:\n\n" +
-            "• <span class='font-bold'>Underpopulation:</span> Any live cell with fewer than 2 live neighbors dies.\n" +
-            "• <span class='font-bold'>Survival:</span> Any live cell with 2 or 3 live neighbors survives to the next generation.\n" +
-            "• <span class='font-bold'>Overcrowding:</span> Any live cell with more than 3 live neighbors dies.\n" +
-            "• <span class='font-bold'>Reproduction:</span> Any dead cell with exactly 3 live neighbors becomes alive.\n\n" +
+            "<div class='space-y-2'>" +
+            "<div>• <span class='font-bold'>Underpopulation:</span> Any live cell with fewer than 2 live neighbors dies.</div>" +
+            "<div>• <span class='font-bold'>Survival:</span> Any live cell with 2 or 3 live neighbors survives to the next generation.</div>" +
+            "<div>• <span class='font-bold'>Overcrowding:</span> Any live cell with more than 3 live neighbors dies.</div>" +
+            "<div>• <span class='font-bold'>Reproduction:</span> Any dead cell with exactly 3 live neighbors becomes alive.</div>" +
+            "</div>\n\n" +
             "Despite their simplicity, these rules can produce incredibly rich and varied patterns over time.",
   'Seeds': "Seeds: A cell is born if it has exactly 2 neighbors, and dies in the next generation. Creates expanding, fractal-like patterns that never stabilize.",
   'HighLife': "HighLife: Similar to Conway's Game of Life, but cells are also born with 6 neighbors. Features a replicator pattern that can create copies of itself.",

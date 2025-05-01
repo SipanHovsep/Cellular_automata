@@ -85,18 +85,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     if (isAnimating && currentGeneration < numGenerations) {
       timer = setTimeout(() => {
         const currentGrid = history[history.length - 1];
-        // Create a new grid with width matching the current generation
-        const nextGrid = createOneDGrid(currentGeneration + 1, (i) => {
-          if (i === 0 || i === currentGeneration) {
-            return false; // Edge cells
-          }
-          // Get the previous row's cells that affect this cell
-          const left = currentGrid[i - 1] || false;
-          const center = currentGrid[i] || false;
-          const right = currentGrid[i + 1] || false;
-          // Apply the rule
-          return ruleFunction(left, center, right);
-        });
+        const nextGrid = nextOneDGeneration(currentGrid, ruleFunction);
         setHistory(prev => [...prev, nextGrid]);
         setCurrentGeneration(prev => prev + 1);
       }, animationSpeed);
@@ -109,10 +98,10 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
   const handleReset = useCallback(() => {
     setIsAnimating(false);
     setCurrentGeneration(0);
-    const emptyGrid = createOneDGrid(1, () => false);
+    const emptyGrid = createOneDGrid(numGenerations, () => false);
     setHistory([emptyGrid]);
     setError(null);
-  }, []);
+  }, [numGenerations]);
 
   const handleAnimationSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const speed = parseInt(e.target.value, 10);
@@ -168,8 +157,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     try {
       const ruleFunc = getElementaryRule(ruleNumber);
       setRuleFunction(() => ruleFunc);
-      // Start with a single cell
-      const initialGrid = createOneDGrid(1, (i) => i === 0);
+      const initialGrid = createOneDGrid(numGenerations, singleCellInitializer(numGenerations));
       setHistory([initialGrid]);
       setCurrentGeneration(0);
       setIsAnimating(true);
@@ -178,7 +166,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
       setError(e.message || "Invalid rule number.");
       setHistory([]);
     }
-  }, [ruleNumber]);
+  }, [numGenerations, ruleNumber]);
 
   return (
     <div className="space-y-4">

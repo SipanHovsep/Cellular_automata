@@ -82,21 +82,6 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     setHistory([emptyGrid]);
   }, [width]);
 
-  const generateHistory = useCallback(() => {
-    try {
-      const ruleFunc = getElementaryRule(ruleNumber);
-      setRuleFunction(() => ruleFunc);
-      const initialGrid = createOneDGrid(width, singleCellInitializer(width));
-      setHistory([initialGrid]);
-      setCurrentGeneration(0);
-      setIsAnimating(true);
-      setError(null);
-    } catch (e: any) {
-      setError(e.message || "Invalid rule number.");
-      setHistory([]);
-    }
-  }, [width, ruleNumber]);
-
   // Animation effect
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -104,6 +89,12 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
       timer = setTimeout(() => {
         const currentGrid = history[history.length - 1];
         const nextGrid = nextOneDGeneration(currentGrid, ruleFunction);
+        
+        // Check if we need to increase width
+        if (currentGeneration >= 50 && width < numGenerations) {
+          setWidth(prev => prev + 1);
+        }
+        
         setHistory(prev => [...prev, nextGrid]);
         setCurrentGeneration(prev => prev + 1);
       }, animationSpeed);
@@ -111,15 +102,16 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
       setIsAnimating(false);
     }
     return () => clearTimeout(timer);
-  }, [isAnimating, currentGeneration, numGenerations, history, ruleFunction]);
+  }, [isAnimating, currentGeneration, numGenerations, history, ruleFunction, width]);
 
   const handleReset = useCallback(() => {
     setIsAnimating(false);
     setCurrentGeneration(0);
-    const emptyGrid = createOneDGrid(width, () => false);
+    setWidth(initialWidth); // Reset width to initial value
+    const emptyGrid = createOneDGrid(initialWidth, () => false);
     setHistory([emptyGrid]);
     setError(null);
-  }, [width]);
+  }, [initialWidth]);
 
   const handleAnimationSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const speed = parseInt(e.target.value, 10);
@@ -180,6 +172,22 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
     }
   };
 
+  const generateHistory = useCallback(() => {
+    try {
+      const ruleFunc = getElementaryRule(ruleNumber);
+      setRuleFunction(() => ruleFunc);
+      setWidth(initialWidth); // Reset width to initial value
+      const initialGrid = createOneDGrid(initialWidth, singleCellInitializer(initialWidth));
+      setHistory([initialGrid]);
+      setCurrentGeneration(0);
+      setIsAnimating(true);
+      setError(null);
+    } catch (e: any) {
+      setError(e.message || "Invalid rule number.");
+      setHistory([]);
+    }
+  }, [initialWidth, ruleNumber]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4 p-4 border rounded-md bg-card text-card-foreground">
@@ -209,13 +217,13 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
         </div>
 
         <div className="flex items-center gap-2">
-          <Label htmlFor="widthInput">Width:</Label>
+          <Label htmlFor="widthInput">Initial Width:</Label>
           <Input
             id="widthInput"
             type="number"
             min="10"
             max="499"
-            value={width}
+            value={initialWidth}
             onChange={handleWidthChange}
             className="w-[80px]"
           />
@@ -254,7 +262,7 @@ const ElementaryAutomataSimulator: React.FC<ElementaryAutomataSimulatorProps> = 
         <div className="flex-1">
           <GridDisplay 
             grid={history} 
-            cellSize={Math.max(1, Math.min(8, Math.min(500 / width, 500 / numGenerations)))} // Scale based on both width and generations
+            cellSize={Math.max(1, Math.min(8, 500 / width))} // Scale based on current width
           />
         </div>
         <div className="flex-1 p-4 border rounded-md bg-card">

@@ -7,11 +7,129 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CustomRuleSimulatorProps {
   initialRows?: number;
   initialCols?: number;
 }
+
+interface Rule {
+  name: string;
+  description: string;
+  rule: RuleFunction;
+}
+
+const rules: Rule[] = [
+  {
+    name: "Conway's Game of Life",
+    description: "A cell lives if it has 2-3 neighbors, dies otherwise. A dead cell becomes alive with exactly 3 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return (aliveNeighbors === 2 || aliveNeighbors === 3) ? 1 : 0;
+      } else {
+        return aliveNeighbors === 3 ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "High Life",
+    description: "Similar to Conway's but cells also come alive with 6 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return (aliveNeighbors === 2 || aliveNeighbors === 3) ? 1 : 0;
+      } else {
+        return (aliveNeighbors === 3 || aliveNeighbors === 6) ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "Day & Night",
+    description: "Cells survive with 3-6-7-8 neighbors, and are born with 3-6-7-8 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      const survival = [3, 4, 6, 7, 8].includes(aliveNeighbors);
+      const birth = [3, 6, 7, 8].includes(aliveNeighbors);
+      return current === 1 ? (survival ? 1 : 0) : (birth ? 1 : 0);
+    }
+  },
+  {
+    name: "Maze",
+    description: "Cells survive with 1-2-3-4-5 neighbors, and are born with 3 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return (aliveNeighbors >= 1 && aliveNeighbors <= 5) ? 1 : 0;
+      } else {
+        return aliveNeighbors === 3 ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "Replicator",
+    description: "Cells survive with 1-3-5-7 neighbors, and are born with 1-3-5-7 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      const survival = [1, 3, 5, 7].includes(aliveNeighbors);
+      const birth = [1, 3, 5, 7].includes(aliveNeighbors);
+      return current === 1 ? (survival ? 1 : 0) : (birth ? 1 : 0);
+    }
+  },
+  {
+    name: "Seeds",
+    description: "Cells are only born with exactly 2 neighbors, and always die in the next generation.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      return aliveNeighbors === 2 ? 1 : 0;
+    }
+  },
+  {
+    name: "Diamoeba",
+    description: "Cells survive with 5-6-7-8 neighbors, and are born with 3-5-6-7-8 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return (aliveNeighbors >= 5 && aliveNeighbors <= 8) ? 1 : 0;
+      } else {
+        return (aliveNeighbors >= 3 && aliveNeighbors <= 8) ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "2x2",
+    description: "Cells survive with 1-2-5 neighbors, and are born with 3-6 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return ([1, 2, 5].includes(aliveNeighbors)) ? 1 : 0;
+      } else {
+        return ([3, 6].includes(aliveNeighbors)) ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "Move",
+    description: "Cells survive with 2-4-5 neighbors, and are born with 3-6-8 neighbors.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      if (current === 1) {
+        return ([2, 4, 5].includes(aliveNeighbors)) ? 1 : 0;
+      } else {
+        return ([3, 6, 8].includes(aliveNeighbors)) ? 1 : 0;
+      }
+    }
+  },
+  {
+    name: "Serviettes",
+    description: "Cells are only born with exactly 2 neighbors, and always die in the next generation.",
+    rule: (neighbors, current) => {
+      const aliveNeighbors = neighbors.filter(n => n === 1).length;
+      return aliveNeighbors === 2 ? 1 : 0;
+    }
+  }
+];
 
 const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
   initialRows = 50,
@@ -19,27 +137,21 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
 }) => {
   const [rows, setRows] = useState(initialRows);
   const [cols, setCols] = useState(initialCols);
-  const [grid, setGrid] = useState<Grid>(() => createGrid(rows, cols, () => 0)); // Start with empty grid
+  const [grid, setGrid] = useState<Grid>(() => createGrid(rows, cols, () => 0));
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState(100);
   const [generation, setGeneration] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawMode, setDrawMode] = useState<'add' | 'remove'>('add');
   const [brushSize, setBrushSize] = useState(1);
+  const [selectedRule, setSelectedRule] = useState<Rule>(rules[0]);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const runSimulation = useCallback(() => {
-    setGrid((currentGrid) => nextGeneration(currentGrid, (neighbors, current) => {
-      const aliveNeighbors = neighbors.filter(n => n === 1).length;
-      if (current === 1) {
-        return (aliveNeighbors === 2 || aliveNeighbors === 3) ? 1 : 0;
-      } else {
-        return aliveNeighbors === 3 ? 1 : 0;
-      }
-    }));
+    setGrid((currentGrid) => nextGeneration(currentGrid, selectedRule.rule));
     setGeneration((g) => g + 1);
-  }, []);
+  }, [selectedRule]);
 
   useEffect(() => {
     if (isRunning) {
@@ -134,6 +246,35 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
       </div>
 
       <div className="w-64 space-y-4">
+        <div className="p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
+          <h3 className="text-lg font-bold text-purple-600 mb-4">Rules</h3>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ruleSelect" className="text-purple-600">Select Rule:</Label>
+              <Select
+                value={selectedRule.name}
+                onValueChange={(value) => {
+                  const rule = rules.find(r => r.name === value);
+                  if (rule) setSelectedRule(rule);
+                }}
+              >
+                <SelectTrigger id="ruleSelect" className="border-purple-600">
+                  <SelectValue placeholder="Select a rule" />
+                </SelectTrigger>
+                <SelectContent>
+                  {rules.map((rule) => (
+                    <SelectItem key={rule.name} value={rule.name}>
+                      {rule.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground mt-2">{selectedRule.description}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
           <h3 className="text-lg font-bold text-purple-600 mb-4">Drawing Controls</h3>
           

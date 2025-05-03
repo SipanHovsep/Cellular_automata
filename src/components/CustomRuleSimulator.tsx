@@ -204,8 +204,8 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
   };
 
   return (
-    <div className="flex gap-8">
-      <div className="flex-1">
+    <div className="flex gap-8 h-full">
+      <div className="flex-1 flex flex-col">
         <div className="flex flex-wrap items-center gap-4 p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground mb-4">
           <Button 
             onClick={handleStartStop} 
@@ -238,13 +238,15 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
           <div className="text-lg font-bold text-purple-600">Generation: {generation}</div>
         </div>
 
-        <GridDisplay 
-          grid={grid} 
-          cellSize={10} 
-          onCellClick={handleCellClick}
-          isDrawing={isDrawing}
-          brushSize={brushSize}
-        />
+        <div className="flex-1 border-2 border-purple-600 rounded-md bg-card text-card-foreground p-4">
+          <GridDisplay 
+            grid={grid} 
+            cellSize={10} 
+            onCellClick={handleCellClick}
+            isDrawing={isDrawing}
+            brushSize={brushSize}
+          />
+        </div>
       </div>
 
       <div className="w-64 space-y-4">

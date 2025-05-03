@@ -1,12 +1,15 @@
 "use client"; // GridDisplay itself doesn't use hooks, but it's used by client components, so marking it might be safer or required depending on usage context.
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Grid, OneDGrid } from '@/lib/automata';
 
 interface GridDisplayProps {
   grid: Grid | OneDGrid;
   cellSize?: number;
   cellColor?: (state: number) => string;
+  onCellClick?: (row: number, col: number) => void;
+  isDrawing?: boolean;
+  brushSize?: number;
 }
 
 const defaultCellColor = (state: number): string => {
@@ -20,7 +23,12 @@ const GridDisplay: React.FC<GridDisplayProps> = ({
   grid,
   cellSize = 10, // default cell size in pixels
   cellColor = defaultCellColor,
+  onCellClick,
+  isDrawing = false,
+  brushSize = 1,
 }) => {
+  const [isMouseDown, setIsMouseDown] = useState(false);
+
   if (!grid || grid.length === 0) {
     return <div className="border border-gray-300 p-4 text-center text-gray-500">No grid data</div>;
   }
@@ -64,9 +72,26 @@ const GridDisplay: React.FC<GridDisplayProps> = ({
       return <div className="border border-gray-300 p-4 text-center text-gray-500">Empty grid data</div>;
   }
 
+  const handleMouseDown = (row: number, col: number) => {
+    setIsMouseDown(true);
+    if (onCellClick) {
+      onCellClick(row, col);
+    }
+  };
+
+  const handleMouseEnter = (row: number, col: number) => {
+    if (isMouseDown && onCellClick) {
+      onCellClick(row, col);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
   return (
     <div
-      className="inline-block border border-gray-300 leading-none"
+      className="inline-block border border-gray-300 leading-none select-none"
       style={{
         gridTemplateColumns: `repeat(${numCols}, ${cellSize}px)`,
         gridTemplateRows: `repeat(${numRows}, ${cellSize}px)`,
@@ -75,19 +100,23 @@ const GridDisplay: React.FC<GridDisplayProps> = ({
         maxWidth: '100%',
         overflowX: 'auto', // Allow horizontal scrolling for wide grids
       }}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     >
       {twoDGrid.map((row, rowIndex) =>
         row.map((cellState, colIndex) => (
           <div
             key={`cell-${rowIndex}-${colIndex}`}
             // Adjusted borders slightly for better look
-            className={`border-r border-b border-gray-200 ${cellColor(cellState)}`}
+            className={`border-r border-b border-gray-200 ${cellColor(cellState)} cursor-pointer`}
             style={{
               width: `${cellSize}px`,
               height: `${cellSize}px`,
               // Ensure borders don't add to size
               boxSizing: 'border-box',
             }}
+            onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+            onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
           />
         ))
       )}

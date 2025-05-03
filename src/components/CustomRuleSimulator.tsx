@@ -283,7 +283,7 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
               <Toggle
                 pressed={drawMode === 'add'}
                 onPressedChange={(pressed) => setDrawMode(pressed ? 'add' : 'remove')}
-                className="bg-purple-600 data-[state=on]:bg-purple-700 text-white"
+                className="bg-purple-600 data-[state=on]:bg-purple-700 text-white hover:text-white data-[state=off]:text-white"
               >
                 {drawMode === 'add' ? 'Add Cells' : 'Remove Cells'}
               </Toggle>

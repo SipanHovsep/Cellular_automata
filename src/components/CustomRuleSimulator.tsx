@@ -98,18 +98,6 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4 p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
-        <div className="flex items-center gap-2">
-            <Label htmlFor="ruleInput" className="text-purple-600 font-bold text-lg">Rule (B/S):</Label>
-            <Input
-                id="ruleInput"
-                type="text"
-                value={ruleString}
-                onChange={handleRuleStringChange}
-                placeholder="e.g., B3/S23"
-                className={`w-[150px] ${ruleError ? 'border-red-500' : 'border-purple-600 focus:ring-purple-600 focus:border-purple-600'}`}
-            />
-        </div>
-
         <Button 
           onClick={handleStartStop} 
           disabled={!ruleFunction || !!ruleError} 

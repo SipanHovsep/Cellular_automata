@@ -1,0 +1,10 @@
+{"data": "suppressed.nii.gz", "basis": "phantom.BASIS", "output": "fsl_mrs_fit", "algo": "Newton", "ignore": null, "keep": null, "combine": null, "ppmlim": null, "h2o": null, "baseline": "poly, 2", "baseline_order": null, "metab_groups": 0, "lorentzian": false, "free_shift": false, "ind_scale": null, "disable_MH_priors": false, "mh_samples": 500, "t1": null, "TE": null, "TR": null, "tissue_frac": null, "t1_values": null, "t2_values": null, "internal_ref": ["Cr", "PCr"], "wref_metabolite": null, "ref_protons": null, "ref_int_limits": null, "h2o_scale": 1.0, "report": true, "verbose": false, "overwrite": false, "conjfid": null, "conjbasis": null, "no_rescale": false, "config": null}
+--------
+Command Line Args:   --data suppressed.nii.gz --basis phantom.BASIS --output fsl_mrs_fit --report
+Defaults:
+  --algo:            Newton
+  --baseline:        poly, 2
+  --metab_groups:    0
+  --mh_samples:      500
+  --internal_ref:    ['Cr', 'PCr']
+  --h2o_scale:       1.0

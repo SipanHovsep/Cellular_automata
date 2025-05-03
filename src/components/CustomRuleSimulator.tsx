@@ -97,23 +97,23 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-4 p-4 border-2 border-[#57068c] rounded-md bg-card text-card-foreground">
+      <div className="flex flex-wrap items-center gap-4 p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
         <div className="flex items-center gap-2">
-            <Label htmlFor="ruleInput" className="text-[#57068c] font-bold text-lg">Rule (B/S):</Label>
+            <Label htmlFor="ruleInput" className="text-purple-600 font-bold text-lg">Rule (B/S):</Label>
             <Input
                 id="ruleInput"
                 type="text"
                 value={ruleString}
                 onChange={handleRuleStringChange}
                 placeholder="e.g., B3/S23"
-                className={`w-[150px] ${ruleError ? 'border-red-500' : 'border-[#57068c] focus:ring-[#57068c] focus:border-[#57068c]'}`}
+                className={`w-[150px] ${ruleError ? 'border-red-500' : 'border-purple-600 focus:ring-purple-600 focus:border-purple-600'}`}
             />
         </div>
 
         <Button 
           onClick={handleStartStop} 
           disabled={!ruleFunction || !!ruleError} 
-          className="bg-[#57068c] hover:bg-[#45056c] text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
         >
           {isRunning ? 'Stop' : 'Start'}
         </Button>
@@ -121,13 +121,13 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
         <Button 
           onClick={handleReset} 
           variant="outline" 
-          className="border-2 border-[#57068c] text-[#57068c] hover:bg-[#57068c] hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
+          className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
         >
           Reset
         </Button>
 
         <div className="flex items-center gap-2">
-          <Label htmlFor="customSpeedSlider" className="whitespace-nowrap text-[#57068c] font-bold text-lg">Speed:</Label>
+          <Label htmlFor="customSpeedSlider" className="whitespace-nowrap text-purple-600 font-bold text-lg">Speed:</Label>
           <Slider
             id="customSpeedSlider"
             min={1}
@@ -135,11 +135,11 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
             step={1}
             defaultValue={[100 - (speed - 10) / 10]}
             onValueChange={handleSpeedChange}
-            className="w-[150px] [&_[role=slider]]:bg-[#57068c] [&_[role=slider]]:shadow-lg [&_[role=slider]]:hover:shadow-xl"
+            className="w-[150px] [&_[role=slider]]:bg-purple-600 [&_[role=slider]]:shadow-lg [&_[role=slider]]:hover:shadow-xl"
             disabled={isRunning}
           />
         </div>
-        <div className="text-lg font-bold text-[#57068c]">Generation: {generation}</div>
+        <div className="text-lg font-bold text-purple-600">Generation: {generation}</div>
       </div>
 
       {ruleError && (

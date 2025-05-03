@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SuggestionForm from './SuggestionForm';
 
 interface CustomRuleSimulatorProps {
   initialRows?: number;
@@ -145,6 +146,7 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
   const [drawMode, setDrawMode] = useState<'add' | 'remove'>('add');
   const [brushSize, setBrushSize] = useState(1);
   const [selectedRule, setSelectedRule] = useState<Rule>(rules[0]);
+  const [isAdding, setIsAdding] = useState(true);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -278,34 +280,32 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
         <div className="p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
           <h3 className="text-lg font-bold text-purple-600 mb-4">Drawing Controls</h3>
           
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Add/Remove Cells</Label>
               <Toggle
-                pressed={drawMode === 'add'}
-                onPressedChange={(pressed) => setDrawMode(pressed ? 'add' : 'remove')}
-                className="bg-purple-600 data-[state=on]:bg-purple-700 text-white hover:text-white data-[state=off]:text-white"
+                pressed={isAdding}
+                onPressedChange={setIsAdding}
+                className="bg-purple-600 hover:bg-purple-700 text-white hover:text-white data-[state=on]:bg-purple-700 data-[state=off]:text-white"
               >
-                {drawMode === 'add' ? 'Add Cells' : 'Remove Cells'}
+                {isAdding ? "Add Cells" : "Remove Cells"}
               </Toggle>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="brushSize" className="text-purple-600">Brush Size: {brushSize}</Label>
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Brush Size</Label>
               <Slider
-                id="brushSize"
+                value={[brushSize]}
+                onValueChange={(value) => setBrushSize(value[0])}
                 min={1}
                 max={5}
                 step={1}
-                value={[brushSize]}
-                onValueChange={handleBrushSizeChange}
-                className="[&_[role=slider]]:bg-purple-600"
+                className="w-full"
               />
+              <div className="text-sm text-purple-600 text-center">{brushSize}</div>
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              <p>Click and drag to draw on the grid</p>
-              <p>Press Space to toggle drawing mode</p>
-            </div>
+            <SuggestionForm />
           </div>
         </div>
       </div>

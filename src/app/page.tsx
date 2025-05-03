@@ -24,7 +24,7 @@ export default function Home() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-6">
           <TabsTrigger value="famous-2d">Famous 2D</TabsTrigger>
           <TabsTrigger value="elementary-1d">Elementary 1D</TabsTrigger>
-          <TabsTrigger value="custom-bs">Custom B/S</TabsTrigger>
+          <TabsTrigger value="custom-bs">Make Your Own</TabsTrigger>
           <TabsTrigger value="fire">Forest Fire</TabsTrigger>
           <TabsTrigger value="crystal">Crystal Growth</TabsTrigger>
         </TabsList>
@@ -56,8 +56,8 @@ export default function Home() {
         <TabsContent value="custom-bs">
           <Card>
             <CardHeader>
-              <CardTitle>Custom B/S Rule Simulator</CardTitle>
-              <CardDescription>Define your own 2D cellular automata rules using the Birth/Survival (B/S) notation (e.g., B3/S23 for Conway). Experiment with different conditions.</CardDescription>
+              <CardTitle>Make Your Own Automata</CardTitle>
+              <CardDescription>Create your own cellular automata rules using the Birth/Survival (B/S) notation. Experiment with different conditions and watch unique patterns emerge.</CardDescription>
             </CardHeader>
             <CardContent>
               <CustomRuleSimulator />

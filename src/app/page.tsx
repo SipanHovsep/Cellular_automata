@@ -24,7 +24,7 @@ export default function Home() {
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 mb-6">
           <TabsTrigger value="famous-2d">Famous 2D</TabsTrigger>
           <TabsTrigger value="elementary-1d">Elementary 1D</TabsTrigger>
-          <TabsTrigger value="custom-bs">Make Your Own</TabsTrigger>
+          <TabsTrigger value="custom-bs" className="bg-purple-600 text-white hover:bg-purple-700 data-[state=active]:bg-purple-700">Make Your Own</TabsTrigger>
           <TabsTrigger value="fire">Forest Fire</TabsTrigger>
           <TabsTrigger value="crystal">Crystal Growth</TabsTrigger>
         </TabsList>

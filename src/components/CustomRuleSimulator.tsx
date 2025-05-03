@@ -133,8 +133,8 @@ const rules: Rule[] = [
 ];
 
 const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
-  initialRows = 80,
-  initialCols = 120,
+  initialRows = 60,
+  initialCols = 100,
 }) => {
   const [rows, setRows] = useState(initialRows);
   const [cols, setCols] = useState(initialCols);
@@ -238,10 +238,10 @@ const CustomRuleSimulator: React.FC<CustomRuleSimulatorProps> = ({
           <div className="text-lg font-bold text-purple-600">Generation: {generation}</div>
         </div>
 
-        <div className="flex-1 border-2 border-purple-600 rounded-md bg-card text-card-foreground p-4">
+        <div className="flex-1 border-2 border-purple-600 rounded-md bg-card text-card-foreground p-4 flex items-center justify-center">
           <GridDisplay 
             grid={grid} 
-            cellSize={8} 
+            cellSize={9} 
             onCellClick={handleCellClick}
             isDrawing={isDrawing}
             brushSize={brushSize}

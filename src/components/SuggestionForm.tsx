@@ -92,10 +92,6 @@ const SuggestionForm: React.FC = () => {
           <p className="text-red-600 text-sm">Something went wrong. Please try again later.</p>
         )}
       </form>
-
-      <p className="text-sm text-muted-foreground mt-4">
-        Suggestions will be sent to sipan.hovsep@gmail.com
-      </p>
     </div>
   );
 };

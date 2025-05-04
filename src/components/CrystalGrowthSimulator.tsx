@@ -57,7 +57,8 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
       
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-          if (currentGrid[i][j] >= 2 && currentGrid[i][j] <= 4) { // Growing crystal
+          // Handle seed cells (1) and growing crystals (2-4)
+          if (currentGrid[i][j] >= 1 && currentGrid[i][j] <= 4) {
             // Check neighbors for growth
             for (let di = -1; di <= 1; di++) {
               for (let dj = -1; dj <= 1; dj++) {
@@ -72,7 +73,7 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
                     let growthChance = growthRate;
                     
                     // Apply anisotropy based on crystal type
-                    if (currentGrid[i][j] === 2) { // Cubic
+                    if (currentGrid[i][j] === 1 || currentGrid[i][j] === 2) { // Seed or Cubic
                       growthChance *= 0.8; // Slower growth
                     } else if (currentGrid[i][j] === 3) { // Hexagonal
                       if (Math.abs(di) === Math.abs(dj)) growthChance *= 1.2; // Faster diagonal growth
@@ -94,7 +95,12 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
                       if (Math.random() < defectProbability) {
                         newGrid[ni][nj] = 6; // Defect
                       } else {
-                        newGrid[ni][nj] = currentGrid[i][j]; // Continue crystal growth
+                        // If it's a seed cell, convert it to the appropriate crystal type
+                        if (currentGrid[i][j] === 1) {
+                          newGrid[ni][nj] = 2; // Start as cubic
+                        } else {
+                          newGrid[ni][nj] = currentGrid[i][j]; // Continue crystal growth
+                        }
                       }
                     }
                   }

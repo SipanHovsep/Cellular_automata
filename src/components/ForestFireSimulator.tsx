@@ -70,6 +70,9 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
                 const nj = j + dj;
                 
                 if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
+                  // Skip if neighbor is rock or water
+                  if (currentGrid[ni][nj] === 3 || currentGrid[ni][nj] === 4) continue;
+                  
                   // Apply wind direction bonus
                   let spreadChance = fireSpreadProbability;
                   if (windDirection !== 'none') {

@@ -34,7 +34,7 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
   const [speed, setSpeed] = useState(100);
   const [generation, setGeneration] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [drawMode, setDrawMode] = useState<'tree' | 'rock' | 'water' | 'young' | 'old'>('tree');
+  const [drawMode, setDrawMode] = useState<'tree' | 'rock' | 'water' | 'young' | 'old' | 'fire'>('tree');
   const [brushSize, setBrushSize] = useState(1);
   const [windDirection, setWindDirection] = useState<'north' | 'south' | 'east' | 'west' | 'none'>('none');
   const [windIntensity, setWindIntensity] = useState(0);
@@ -183,6 +183,11 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
           newGrid[row][col] = 5;
         } else if (drawMode === 'old') {
           newGrid[row][col] = 6;
+        } else if (drawMode === 'fire') {
+          // Only allow fire to be placed on trees
+          if (currentGrid[row][col] === 1 || currentGrid[row][col] === 5 || currentGrid[row][col] === 6) {
+            newGrid[row][col] = 2;
+          }
         }
         return newGrid;
       });
@@ -270,7 +275,7 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
               <Label className="text-purple-600">Draw Mode:</Label>
               <Select
                 value={drawMode}
-                onValueChange={(value: 'tree' | 'rock' | 'water' | 'young' | 'old') => setDrawMode(value)}
+                onValueChange={(value: 'tree' | 'rock' | 'water' | 'young' | 'old' | 'fire') => setDrawMode(value)}
               >
                 <SelectTrigger className="border-purple-600">
                   <SelectValue placeholder="Select drawing mode" />
@@ -281,6 +286,7 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
                   <SelectItem value="water">Water</SelectItem>
                   <SelectItem value="young">Young Tree</SelectItem>
                   <SelectItem value="old">Old Tree</SelectItem>
+                  <SelectItem value="fire">Fire</SelectItem>
                 </SelectContent>
               </Select>
             </div>

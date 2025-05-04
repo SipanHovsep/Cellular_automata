@@ -180,20 +180,33 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
     if (!isRunning) {
       setGrid(currentGrid => {
         const newGrid = currentGrid.map(r => [...r]);
-        if (drawMode === 'tree') {
-          newGrid[row][col] = 1;
-        } else if (drawMode === 'rock') {
-          newGrid[row][col] = 3;
-        } else if (drawMode === 'water') {
-          newGrid[row][col] = 4;
-        } else if (drawMode === 'young') {
-          newGrid[row][col] = 5;
-        } else if (drawMode === 'old') {
-          newGrid[row][col] = 6;
-        } else if (drawMode === 'fire') {
-          // Only allow fire to be placed on trees
-          if (currentGrid[row][col] === 1 || currentGrid[row][col] === 5 || currentGrid[row][col] === 6) {
-            newGrid[row][col] = 2;
+        const halfSize = Math.floor(brushSize / 2);
+        
+        // Create a square area around the clicked cell
+        for (let i = -halfSize; i <= halfSize; i++) {
+          for (let j = -halfSize; j <= halfSize; j++) {
+            const newRow = row + i;
+            const newCol = col + j;
+            
+            // Check if the cell is within grid bounds
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+              if (drawMode === 'tree') {
+                newGrid[newRow][newCol] = 1;
+              } else if (drawMode === 'rock') {
+                newGrid[newRow][newCol] = 3;
+              } else if (drawMode === 'water') {
+                newGrid[newRow][newCol] = 4;
+              } else if (drawMode === 'young') {
+                newGrid[newRow][newCol] = 5;
+              } else if (drawMode === 'old') {
+                newGrid[newRow][newCol] = 6;
+              } else if (drawMode === 'fire') {
+                // Only allow fire to be placed on trees
+                if (currentGrid[newRow][newCol] === 1 || currentGrid[newRow][newCol] === 5 || currentGrid[newRow][newCol] === 6) {
+                  newGrid[newRow][newCol] = 2;
+                }
+              }
+            }
           }
         }
         return newGrid;

@@ -1,63 +1,115 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Grid, createGrid, nextGeneration, forestInitializer, forestFireRule, FIRE_STATES } from '@/lib/automata';
+import { Grid, createGrid, nextGeneration } from '@/lib/automata';
 import GridDisplay from './GridDisplay';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Toggle } from "@/components/ui/toggle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ForestFireSimulatorProps {
   initialRows?: number;
   initialCols?: number;
-  initialTreeDensity?: number;
-  initialIgnitionProb?: number;
 }
 
-const forestCellColor = (state: number): string => {
-  switch (state) {
-    case FIRE_STATES.EMPTY: return 'bg-yellow-100'; // Soil/Empty
-    case FIRE_STATES.TREE: return 'bg-green-600'; // Healthy Tree
-    case FIRE_STATES.BURNING: return 'bg-red-600 animate-pulse'; // Burning Tree
-    case FIRE_STATES.BURNT: return 'bg-gray-700'; // Burnt Tree
-    default: return 'bg-white';
-  }
-};
+// Cell states:
+// 0: Empty
+// 1: Tree
+// 2: Burning Tree
+// 3: Rock (barrier)
+// 4: Water (barrier)
+// 5: Young Tree (slower to burn)
+// 6: Old Tree (faster to burn)
 
 const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
-  initialRows = 50,
-  initialCols = 70,
-  initialTreeDensity = 0.8,
-  initialIgnitionProb = 0.05, // Lower default, easier to see spread
+  initialRows = 80,
+  initialCols = 120,
 }) => {
   const [rows, setRows] = useState(initialRows);
   const [cols, setCols] = useState(initialCols);
-  const [treeDensity, setTreeDensity] = useState(initialTreeDensity);
-  const [ignitionProb, setIgnitionProb] = useState(initialIgnitionProb);
-  const [grid, setGrid] = useState<Grid>(() => forestInitializer(rows, cols, treeDensity));
+  const [grid, setGrid] = useState<Grid>(() => createGrid(rows, cols, () => 0));
   const [isRunning, setIsRunning] = useState(false);
-  const [speed, setSpeed] = useState(200); // Slower speed for fire spread visualization
+  const [speed, setSpeed] = useState(100);
   const [generation, setGeneration] = useState(0);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawMode, setDrawMode] = useState<'tree' | 'rock' | 'water' | 'young' | 'old'>('tree');
+  const [brushSize, setBrushSize] = useState(1);
+  const [windDirection, setWindDirection] = useState<'north' | 'south' | 'east' | 'west' | 'none'>('none');
+  const [windIntensity, setWindIntensity] = useState(0);
+  const [fireSpreadProbability, setFireSpreadProbability] = useState(0.5);
+  const [rainProbability, setRainProbability] = useState(0.1);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const ruleFunc = useCallback((neighbors: number[], currentState: number) => {
-    return forestFireRule(neighbors, currentState, ignitionProb);
-  }, [ignitionProb]);
-
   const runSimulation = useCallback(() => {
     setGrid((currentGrid) => {
-        // Check if any fire exists
-        const hasFire = currentGrid.flat().some(cell => cell === FIRE_STATES.BURNING);
-        if (!hasFire && generation > 0) { // Stop if fire burns out (after first step)
-            setIsRunning(false);
-            return currentGrid;
+      const newGrid = currentGrid.map(row => [...row]);
+      
+      // Apply wind effects
+      const windSpreadBonus = windIntensity * 0.1;
+      
+      // Apply rain effects
+      const rainExtinguishes = Math.random() < rainProbability;
+
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          if (currentGrid[i][j] === 2) { // Burning tree
+            if (rainExtinguishes) {
+              newGrid[i][j] = 0; // Extinguish fire
+              continue;
+            }
+
+            // Check neighbors with wind influence
+            for (let di = -1; di <= 1; di++) {
+              for (let dj = -1; dj <= 1; dj++) {
+                if (di === 0 && dj === 0) continue;
+                
+                const ni = i + di;
+                const nj = j + dj;
+                
+                if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
+                  // Apply wind direction bonus
+                  let spreadChance = fireSpreadProbability;
+                  if (windDirection !== 'none') {
+                    if (
+                      (windDirection === 'north' && di === -1) ||
+                      (windDirection === 'south' && di === 1) ||
+                      (windDirection === 'east' && dj === 1) ||
+                      (windDirection === 'west' && dj === -1)
+                    ) {
+                      spreadChance += windSpreadBonus;
+                    } else {
+                      spreadChance -= windSpreadBonus;
+                    }
+                  }
+
+                  if (Math.random() < spreadChance) {
+                    const neighbor = currentGrid[ni][nj];
+                    if (neighbor === 1) { // Regular tree
+                      newGrid[ni][nj] = 2;
+                    } else if (neighbor === 5) { // Young tree
+                      if (Math.random() < spreadChance * 0.7) { // 30% less likely to burn
+                        newGrid[ni][nj] = 2;
+                      }
+                    } else if (neighbor === 6) { // Old tree
+                      if (Math.random() < spreadChance * 1.3) { // 30% more likely to burn
+                        newGrid[ni][nj] = 2;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            newGrid[i][j] = 0; // Tree burns out
+          }
         }
-        return nextGeneration(currentGrid, ruleFunc);
+      }
+      return newGrid;
     });
     setGeneration((g) => g + 1);
-  }, [ruleFunc, generation]);
+  }, [rows, cols, windDirection, windIntensity, fireSpreadProbability, rainProbability]);
 
   useEffect(() => {
     if (isRunning) {
@@ -66,108 +118,216 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [isRunning, speed, runSimulation]);
 
   const handleStartStop = () => {
-    // If starting and no fire exists, ignite the center
-    if (!isRunning) {
-        const hasFire = grid.flat().some(cell => cell === FIRE_STATES.BURNING);
-        if (!hasFire) {
-            setGrid(currentGrid => {
-                const newGrid = currentGrid.map(row => [...row]);
-                const centerRow = Math.floor(rows / 2);
-                const centerCol = Math.floor(cols / 2);
-                if (newGrid[centerRow]?.[centerCol] === FIRE_STATES.TREE) {
-                    newGrid[centerRow][centerCol] = FIRE_STATES.BURNING;
-                }
-                // If center is not a tree, find the nearest tree to ignite (optional, simple ignition for now)
-                return newGrid;
-            });
-        }
-    }
     setIsRunning(!isRunning);
   };
 
   const handleReset = useCallback(() => {
     setIsRunning(false);
-    setGrid(forestInitializer(rows, cols, treeDensity));
+    setGrid(createGrid(rows, cols, () => 0));
     setGeneration(0);
-  }, [rows, cols, treeDensity]);
+  }, [rows, cols]);
 
   const handleSpeedChange = (value: number[]) => {
     const newSpeed = 1010 - value[0] * 10;
     setSpeed(newSpeed);
   };
 
-  const handleDensityChange = (value: number[]) => {
-    setTreeDensity(value[0] / 100);
-    // Reset grid when density changes while not running
-    if (!isRunning) handleReset();
+  const handleCellClick = (row: number, col: number) => {
+    if (!isRunning) {
+      setGrid(currentGrid => {
+        const newGrid = currentGrid.map(r => [...r]);
+        if (drawMode === 'tree') {
+          newGrid[row][col] = 1;
+        } else if (drawMode === 'rock') {
+          newGrid[row][col] = 3;
+        } else if (drawMode === 'water') {
+          newGrid[row][col] = 4;
+        } else if (drawMode === 'young') {
+          newGrid[row][col] = 5;
+        } else if (drawMode === 'old') {
+          newGrid[row][col] = 6;
+        }
+        return newGrid;
+      });
+    }
   };
 
-  const handleIgnitionChange = (value: number[]) => {
-    setIgnitionProb(value[0] / 100);
+  const handleBrushSizeChange = (value: number[]) => {
+    setBrushSize(value[0]);
   };
 
-  // Reset grid if parameters change while not running
-  useEffect(() => {
-      if (!isRunning) {
-          handleReset();
-      }
-  }, [treeDensity, handleReset, isRunning]);
+  const getCellColor = (cell: number) => {
+    switch (cell) {
+      case 0: return 'bg-gray-100'; // Empty
+      case 1: return 'bg-green-600'; // Tree
+      case 2: return 'bg-red-600'; // Burning
+      case 3: return 'bg-gray-400'; // Rock
+      case 4: return 'bg-blue-400'; // Water
+      case 5: return 'bg-green-400'; // Young Tree
+      case 6: return 'bg-green-800'; // Old Tree
+      default: return 'bg-gray-100';
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Forest Fire Simulation</h3>
-      <div className="flex flex-wrap items-center gap-4 p-4 border rounded-md bg-card text-card-foreground">
-        <Button onClick={handleStartStop}>{isRunning ? 'Stop' : 'Start Fire'}</Button>
-        <Button onClick={handleReset} variant="outline">Reset Forest</Button>
+    <div className="flex gap-8 h-full">
+      <div className="flex-1 flex flex-col">
+        <div className="flex flex-wrap items-center gap-4 p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground mb-4">
+          <Button 
+            onClick={handleStartStop} 
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            {isRunning ? 'Stop' : 'Start'}
+          </Button>
+          
+          <Button 
+            onClick={handleReset} 
+            variant="outline" 
+            className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            Reset
+          </Button>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="densitySlider" className="whitespace-nowrap">Tree Density ({Math.round(treeDensity * 100)}%):</Label>
-          <Slider
-            id="densitySlider"
-            min={0}
-            max={100}
-            step={1}
-            defaultValue={[treeDensity * 100]}
-            onValueChange={handleDensityChange}
-            className="w-[150px]"
-            disabled={isRunning}
-          />
+          <div className="flex items-center gap-2">
+            <Label htmlFor="customSpeedSlider" className="whitespace-nowrap text-purple-600 font-bold text-lg">Speed:</Label>
+            <Slider
+              id="customSpeedSlider"
+              min={1}
+              max={100}
+              step={1}
+              defaultValue={[100 - (speed - 10) / 10]}
+              onValueChange={handleSpeedChange}
+              className="w-[150px] [&_[role=slider]]:bg-purple-600 [&_[role=slider]]:shadow-lg [&_[role=slider]]:hover:shadow-xl"
+              disabled={isRunning}
+            />
+          </div>
+          <div className="text-lg font-bold text-purple-600">Generation: {generation}</div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Label htmlFor="ignitionSlider" className="whitespace-nowrap">Ignition Prob ({Math.round(ignitionProb * 100)}%):</Label>
-          <Slider
-            id="ignitionSlider"
-            min={0}
-            max={100}
-            step={1}
-            defaultValue={[ignitionProb * 100]}
-            onValueChange={handleIgnitionChange}
-            className="w-[150px]"
+        <div className="flex-1 border-2 border-purple-600 rounded-md bg-card text-card-foreground p-4 flex items-center justify-center">
+          <GridDisplay 
+            grid={grid} 
+            cellSize={9}
+            onCellClick={handleCellClick}
+            isDrawing={isDrawing}
+            brushSize={brushSize}
+            getCellColor={getCellColor}
           />
         </div>
-
-        <div className="flex items-center gap-2">
-          <Label htmlFor="fireSpeedSlider" className="whitespace-nowrap">Speed:</Label>
-          <Slider
-            id="fireSpeedSlider"
-            min={1}
-            max={100}
-            step={1}
-            defaultValue={[100 - (speed - 10) / 10]}
-            onValueChange={handleSpeedChange}
-            className="w-[150px]"
-            disabled={isRunning}
-          />
-        </div>
-        <div className="text-sm text-muted-foreground">Generation: {generation}</div>
       </div>
 
-      <GridDisplay grid={grid} cellSize={10} cellColor={forestCellColor} />
+      <div className="w-64 space-y-4">
+        <div className="p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
+          <h3 className="text-lg font-bold text-purple-600 mb-4">Drawing Controls</h3>
+          
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Draw Mode:</Label>
+              <Select
+                value={drawMode}
+                onValueChange={(value: 'tree' | 'rock' | 'water' | 'young' | 'old') => setDrawMode(value)}
+              >
+                <SelectTrigger className="border-purple-600">
+                  <SelectValue placeholder="Select drawing mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tree">Tree</SelectItem>
+                  <SelectItem value="rock">Rock</SelectItem>
+                  <SelectItem value="water">Water</SelectItem>
+                  <SelectItem value="young">Young Tree</SelectItem>
+                  <SelectItem value="old">Old Tree</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Brush Size</Label>
+              <Slider
+                value={[brushSize]}
+                onValueChange={handleBrushSizeChange}
+                min={1}
+                max={5}
+                step={1}
+                className="w-full"
+              />
+              <div className="text-sm text-purple-600 text-center">{brushSize}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border-2 border-purple-600 rounded-md bg-card text-card-foreground">
+          <h3 className="text-lg font-bold text-purple-600 mb-4">Environment Controls</h3>
+          
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Wind Direction</Label>
+              <Select
+                value={windDirection}
+                onValueChange={(value: 'north' | 'south' | 'east' | 'west' | 'none') => setWindDirection(value)}
+              >
+                <SelectTrigger className="border-purple-600">
+                  <SelectValue placeholder="Select wind direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Wind</SelectItem>
+                  <SelectItem value="north">North</SelectItem>
+                  <SelectItem value="south">South</SelectItem>
+                  <SelectItem value="east">East</SelectItem>
+                  <SelectItem value="west">West</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Wind Intensity</Label>
+              <Slider
+                value={[windIntensity]}
+                onValueChange={(value) => setWindIntensity(value[0])}
+                min={0}
+                max={10}
+                step={1}
+                className="w-full"
+              />
+              <div className="text-sm text-purple-600 text-center">{windIntensity}</div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Fire Spread Probability</Label>
+              <Slider
+                value={[fireSpreadProbability * 100]}
+                onValueChange={(value) => setFireSpreadProbability(value[0] / 100)}
+                min={0}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+              <div className="text-sm text-purple-600 text-center">{Math.round(fireSpreadProbability * 100)}%</div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label className="text-purple-600">Rain Probability</Label>
+              <Slider
+                value={[rainProbability * 100]}
+                onValueChange={(value) => setRainProbability(value[0] / 100)}
+                min={0}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+              <div className="text-sm text-purple-600 text-center">{Math.round(rainProbability * 100)}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

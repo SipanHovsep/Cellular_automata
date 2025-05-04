@@ -42,6 +42,10 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handleSpeedChange = (value: number[]) => {
+    setSpeed(100 - (value[0] - 1) * 10);
+  };
+
   const runSimulation = useCallback(() => {
     setGrid((currentGrid) => {
       const newGrid = currentGrid.map(row => [...row]);

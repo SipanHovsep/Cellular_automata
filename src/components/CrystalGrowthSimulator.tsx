@@ -16,11 +16,9 @@ interface CrystalGrowthSimulatorProps {
 // Cell states:
 // 0: Empty (solution)
 // 1: Crystal seed
-// 2: Growing crystal (cubic)
-// 3: Growing crystal (hexagonal)
-// 4: Growing crystal (dendritic)
-// 5: Impurity
-// 6: Defect
+// 2: Growing crystal
+// 3: Impurity
+// 4: Defect
 
 const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
   initialRows = 80,
@@ -33,7 +31,7 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
   const [speed, setSpeed] = useState(100);
   const [generation, setGeneration] = useState(0);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [drawMode, setDrawMode] = useState<'seed' | 'impurity' | 'cubic' | 'hexagonal' | 'dendritic'>('seed');
+  const [drawMode, setDrawMode] = useState<'seed' | 'impurity'>('seed');
   const [brushSize, setBrushSize] = useState(1);
   const [temperature, setTemperature] = useState(25); // Celsius
   const [concentration, setConcentration] = useState(0.5); // Solution concentration
@@ -57,8 +55,8 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
       
       for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
-          // Handle seed cells (1) and growing crystals (2-4)
-          if (currentGrid[i][j] >= 1 && currentGrid[i][j] <= 4) {
+          // Handle seed cells (1) and growing crystals (2)
+          if (currentGrid[i][j] >= 1 && currentGrid[i][j] <= 2) {
             // Check neighbors for growth
             for (let di = -1; di <= 1; di++) {
               for (let dj = -1; dj <= 1; dj++) {
@@ -72,15 +70,6 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
                     // Calculate growth probability based on direction and conditions
                     let growthChance = growthRate;
                     
-                    // Apply anisotropy based on crystal type
-                    if (currentGrid[i][j] === 1 || currentGrid[i][j] === 2) { // Seed or Cubic
-                      growthChance *= 0.8; // Slower growth
-                    } else if (currentGrid[i][j] === 3) { // Hexagonal
-                      if (Math.abs(di) === Math.abs(dj)) growthChance *= 1.2; // Faster diagonal growth
-                    } else if (currentGrid[i][j] === 4) { // Dendritic
-                      if (di === 0 || dj === 0) growthChance *= 1.3; // Faster cardinal growth
-                    }
-                    
                     // Apply flow effects
                     if (flowRate > 0) {
                       const flowDirection = Math.atan2(di, dj);
@@ -93,11 +82,11 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
                     if (Math.random() < growthChance) {
                       // Check for defect formation
                       if (Math.random() < defectProbability) {
-                        newGrid[ni][nj] = 6; // Defect
+                        newGrid[ni][nj] = 4; // Defect
                       } else {
-                        // If it's a seed cell, convert it to the appropriate crystal type
+                        // If it's a seed cell, convert it to growing crystal
                         if (currentGrid[i][j] === 1) {
-                          newGrid[ni][nj] = 2; // Start as cubic
+                          newGrid[ni][nj] = 2; // Start growing
                         } else {
                           newGrid[ni][nj] = currentGrid[i][j]; // Continue crystal growth
                         }
@@ -155,13 +144,7 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
               if (drawMode === 'seed') {
                 newGrid[newRow][newCol] = 1;
               } else if (drawMode === 'impurity') {
-                newGrid[newRow][newCol] = 5;
-              } else if (drawMode === 'cubic') {
-                newGrid[newRow][newCol] = 2;
-              } else if (drawMode === 'hexagonal') {
                 newGrid[newRow][newCol] = 3;
-              } else if (drawMode === 'dendritic') {
-                newGrid[newRow][newCol] = 4;
               }
             }
           }
@@ -179,11 +162,9 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
     switch (cell) {
       case 0: return 'bg-blue-100'; // Solution
       case 1: return 'bg-purple-600'; // Seed
-      case 2: return 'bg-amber-500'; // Cubic crystal
-      case 3: return 'bg-emerald-500'; // Hexagonal crystal
-      case 4: return 'bg-rose-500'; // Dendritic crystal
-      case 5: return 'bg-gray-400'; // Impurity
-      case 6: return 'bg-gray-800'; // Defect
+      case 2: return 'bg-amber-500'; // Growing crystal
+      case 3: return 'bg-gray-400'; // Impurity
+      case 4: return 'bg-gray-800'; // Defect
       default: return 'bg-blue-100';
     }
   };
@@ -244,7 +225,7 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
               <Label className="text-purple-600">Draw Mode:</Label>
               <Select
                 value={drawMode}
-                onValueChange={(value: 'seed' | 'impurity' | 'cubic' | 'hexagonal' | 'dendritic') => setDrawMode(value)}
+                onValueChange={(value: 'seed' | 'impurity') => setDrawMode(value)}
               >
                 <SelectTrigger className="border-purple-600">
                   <SelectValue placeholder="Select drawing mode" />
@@ -252,9 +233,6 @@ const CrystalGrowthSimulator: React.FC<CrystalGrowthSimulatorProps> = ({
                 <SelectContent>
                   <SelectItem value="seed">Seed</SelectItem>
                   <SelectItem value="impurity">Impurity</SelectItem>
-                  <SelectItem value="cubic">Cubic Crystal</SelectItem>
-                  <SelectItem value="hexagonal">Hexagonal Crystal</SelectItem>
-                  <SelectItem value="dendritic">Dendritic Crystal</SelectItem>
                 </SelectContent>
               </Select>
             </div>

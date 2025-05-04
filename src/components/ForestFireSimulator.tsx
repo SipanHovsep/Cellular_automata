@@ -139,6 +139,16 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
     setGeneration(0);
   }, [rows, cols]);
 
+  const handleInitializeFire = useCallback(() => {
+    setGrid(currentGrid => {
+      const newGrid = currentGrid.map(r => [...r]);
+      const middleRow = Math.floor(rows / 2);
+      const middleCol = Math.floor(cols / 2);
+      newGrid[middleRow][middleCol] = 2; // Place a burning tree in the middle
+      return newGrid;
+    });
+  }, [rows, cols]);
+
   const handleSpeedChange = (value: number[]) => {
     const newSpeed = 1010 - value[0] * 10;
     setSpeed(newSpeed);
@@ -198,6 +208,14 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
             className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Reset
+          </Button>
+
+          <Button 
+            onClick={handleInitializeFire} 
+            variant="outline" 
+            className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            Start Fire
           </Button>
 
           <div className="flex items-center gap-2">

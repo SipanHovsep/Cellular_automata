@@ -49,6 +49,7 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
       
       // Apply wind effects
       const windSpreadBonus = windIntensity * 0.1;
+      const windJumpDistance = Math.floor(windIntensity / 2); // Maximum cells fire can jump over
       
       // Apply rain effects
       const rainExtinguishes = Math.random() < rainProbability;
@@ -88,6 +89,37 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
                     }
                   }
 
+                  // Check for wind-assisted jumping
+                  if (windDirection !== 'none' && windIntensity > 0) {
+                    let jumpDistance = 0;
+                    let targetRow = ni;
+                    let targetCol = nj;
+                    
+                    // Find the first non-empty cell in wind direction
+                    while (jumpDistance < windJumpDistance) {
+                      if (windDirection === 'north') targetRow--;
+                      else if (windDirection === 'south') targetRow++;
+                      else if (windDirection === 'east') targetCol++;
+                      else if (windDirection === 'west') targetCol--;
+                      
+                      if (targetRow < 0 || targetRow >= rows || targetCol < 0 || targetCol >= cols) break;
+                      
+                      const targetCell = currentGrid[targetRow][targetCol];
+                      if (targetCell === 3 || targetCell === 4) break; // Stop at rocks or water
+                      
+                      if (targetCell === 1 || targetCell === 5 || targetCell === 6) {
+                        // Found a tree, try to ignite it
+                        if (Math.random() < spreadChance * (1 - jumpDistance * 0.2)) { // Decrease chance with distance
+                          newGrid[targetRow][targetCol] = 2;
+                        }
+                        break;
+                      }
+                      
+                      jumpDistance++;
+                    }
+                  }
+
+                  // Normal spread to adjacent cells
                   if (Math.random() < spreadChance) {
                     const neighbor = currentGrid[ni][nj];
                     if (neighbor === 1) { // Regular tree

@@ -139,31 +139,6 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
     setGeneration(0);
   }, [rows, cols]);
 
-  const handleInitializeFire = useCallback(() => {
-    setGrid(currentGrid => {
-      const newGrid = currentGrid.map(r => [...r]);
-      
-      // Find all tree positions (regular, young, and old trees)
-      const treePositions: [number, number][] = [];
-      for (let i = 0; i < rows; i++) {
-        for (let j = 0; j < cols; j++) {
-          if (currentGrid[i][j] === 1 || currentGrid[i][j] === 5 || currentGrid[i][j] === 6) {
-            treePositions.push([i, j]);
-          }
-        }
-      }
-
-      // If there are trees, randomly select one to ignite
-      if (treePositions.length > 0) {
-        const randomIndex = Math.floor(Math.random() * treePositions.length);
-        const [row, col] = treePositions[randomIndex];
-        newGrid[row][col] = 2; // Set the selected tree on fire
-      }
-
-      return newGrid;
-    });
-  }, [rows, cols]);
-
   const handleSpeedChange = (value: number[]) => {
     const newSpeed = 1010 - value[0] * 10;
     setSpeed(newSpeed);
@@ -228,14 +203,6 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
             className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             Reset
-          </Button>
-
-          <Button 
-            onClick={handleInitializeFire} 
-            variant="outline" 
-            className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white font-bold px-6 py-2 text-lg shadow-lg hover:shadow-xl transition-all"
-          >
-            Start Fire
           </Button>
 
           <div className="flex items-center gap-2">

@@ -168,12 +168,12 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
   const getCellColor = (cell: number) => {
     switch (cell) {
       case 0: return 'bg-gray-100'; // Empty
-      case 1: return 'bg-green-600'; // Tree
-      case 2: return 'bg-red-600'; // Burning
-      case 3: return 'bg-gray-400'; // Rock
+      case 1: return 'bg-green-600'; // Regular Tree
+      case 2: return 'bg-red-600 animate-pulse'; // Burning Tree
+      case 3: return 'bg-gray-500'; // Rock
       case 4: return 'bg-blue-400'; // Water
-      case 5: return 'bg-green-400'; // Young Tree
-      case 6: return 'bg-green-800'; // Old Tree
+      case 5: return 'bg-green-400'; // Young Tree (brighter green)
+      case 6: return 'bg-amber-800'; // Old Tree (brown)
       default: return 'bg-gray-100';
     }
   };

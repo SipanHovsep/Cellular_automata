@@ -142,9 +142,24 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
   const handleInitializeFire = useCallback(() => {
     setGrid(currentGrid => {
       const newGrid = currentGrid.map(r => [...r]);
-      const middleRow = Math.floor(rows / 2);
-      const middleCol = Math.floor(cols / 2);
-      newGrid[middleRow][middleCol] = 2; // Place a burning tree in the middle
+      
+      // Find all tree positions (regular, young, and old trees)
+      const treePositions: [number, number][] = [];
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          if (currentGrid[i][j] === 1 || currentGrid[i][j] === 5 || currentGrid[i][j] === 6) {
+            treePositions.push([i, j]);
+          }
+        }
+      }
+
+      // If there are trees, randomly select one to ignite
+      if (treePositions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * treePositions.length);
+        const [row, col] = treePositions[randomIndex];
+        newGrid[row][col] = 2; // Set the selected tree on fire
+      }
+
       return newGrid;
     });
   }, [rows, cols]);

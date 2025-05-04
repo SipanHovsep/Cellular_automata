@@ -223,7 +223,7 @@ const ForestFireSimulator: React.FC<ForestFireSimulatorProps> = ({
             onCellClick={handleCellClick}
             isDrawing={isDrawing}
             brushSize={brushSize}
-            getCellColor={getCellColor}
+            cellColor={getCellColor}
           />
         </div>
       </div>
